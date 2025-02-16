@@ -1,0 +1,14 @@
+1. Sales Performance Analysis:
+SELECT
+FORMAT(soh.OrderDate, 'yyyy-MM') AS Month,
+SUM(soh.TotalDue) AS TotalSalesAmount,
+COUNT(soh.SalesOrderID) AS TotalOrders,
+AVG(soh.TotalDue) AS AverageOrderValue
+FROM
+Sales.SalesOrderHeader soh
+WHERE
+soh.OrderDate >= DATEADD(MONTH, -12, GETDATE())
+GROUP BY
+FORMAT(soh.OrderDate, 'yyyy-MM')
+ORDER BY
+Month DESC;

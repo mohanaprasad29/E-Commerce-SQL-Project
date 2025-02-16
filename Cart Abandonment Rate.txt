@@ -1,0 +1,33 @@
+8. Cart Abandonment Rate:
+WITH CartItems AS (
+SELECT
+sci.CustomerID,
+COUNT(sci.ProductID) AS ItemsAddedToCart
+FROM
+Sales.ShoppingCartItem sci
+GROUP BY
+sci.CustomerID
+),
+CompletedOrders AS (
+SELECT
+soh.CustomerID,
+COUNT(sod.ProductID) AS ItemsPurchased
+FROM
+Sales.SalesOrderHeader soh
+JOIN
+Sales.SalesOrderDetail sod ON soh.SalesOrderID = sod.SalesOrderID
+WHERE
+soh.Status = 5 -- Completed order
+AND soh.OrderDate >= DATEADD(HOUR, -48, GETDATE())
+GROUP BY
+soh.CustomerID
+)
+SELECT
+ci.CustomerID,
+ci.ItemsAddedToCart,
+COALESCE(co.ItemsPurchased, 0) AS ItemsPurchased,
+((ci.ItemsAddedToCart - COALESCE(co.ItemsPurchased, 0)) * 100.0 / ci.ItemsAddedToCart) AS AbandonmentRate
+FROM
+CartItems ci
+LEFT JOIN
+CompletedOrders co ON ci.CustomerID = co.CustomerID
